@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un Mensaje para Estefani</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 2. Estilos para que se vea bonito */
+        body {
+            margin: 0;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            overflow: hidden; /* Evita barras de scroll por las flores */
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 40px 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+        }
+
+        /* El espacio donde aparecen las frases */
+        #phrase-display-container {
+            min-height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        #phrase-display {
+            font-family: 'Great Vibes', cursive; /* Fuente elegante para las frases */
+            font-size: 3.5em;
+            color: #c83b68;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        #phrase-display.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Contenedor para los botones */
+        #button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Estilo de cada botón */
+        .letter-button {
+            width: 70px;
+            height: 70px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #583c4b;
+            background-color: #fff;
+            border: 2px solid #fad0c4;
+            border-radius: 50%; /* Botones redondos */
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .letter-button:hover {
+            background-color: #ff9a9e;
+            color: white;
+            border-color: #ff9a9e;
+            transform: translateY(-3px);
+        }
+        
+        /* Estilo para botones ya presionados */
+        .letter-button:disabled {
+            background-color: #f38181;
+            color: white;
+            cursor: not-allowed;
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+        
+        /* Animación de flores */
+        .flower {
+            position: absolute;
+            font-size: 2em;
+            pointer-events: none; /* Para que no interfieran con los clics */
+            animation: floatUp 4s ease-out forwards;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-200px) scale(0.5) rotate(360deg);
+            }
+        }
+        
+        /* Botón de reinicio */
+        #reset-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: none;
+            border: 2px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #reset-button:hover {
+            background: white;
+            color: #f38181;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="phrase-display-container">
+            <p id="phrase-display">Un mensaje especial para ti...</p>
+        </div>
+
+        <div id="button-container">
+            <button class="letter-button" data-letter="E">E</button>
+            <button class="letter-button" data-letter="S">S</button>
+            <button class="letter-button" data-letter="T">T</button>
+            <button class="letter-button" data-letter="E">E</button>
+            <button class="letter-button" data-letter="F">F</button>
+            <button class="letter-button" data-letter="A">A</button>
+            <button class="letter-button" data-letter="N">N</button>
+            <button class="letter-button" data-letter="I">I</button>
+        </div>
+    </div>
+    
+    <button id="reset-button">Reiniciar</button>
+
+    <script>
+        const nameSequence = "ESTEFANI";
+        const phrases = [
+            "Eres la luz que ilumina mis días.",
+            "Siempre te encuentro en cada accion que hago.",
+            "Tu voz me calma la ansiedad.",
+            "Estoy orgulloso de todo lo que lograste y de lo que lograras.", // <-- Frase modificada
+            "Formas parte de mis mejores recuerdos.",
+            "Admiro la fuerza de tu corazón.",
+            "No hay amiga mas importante que tu.",
+            "¡Simplemente gracias por existir!"
+        ];
+
+        let progressIndex = 0;
+        
+        const buttons = document.querySelectorAll('.letter-button');
+        const phraseDisplay = document.getElementById('phrase-display');
+        const resetButton = document.getElementById('reset-button');
+        
+        // Función para crear una flor animada
+        function createFlower() {
+            const flower = document.createElement('span');
+            flower.classList.add('flower');
+            flower.innerHTML = '🌸'; // Usamos un emoji de flor
+
+            // Posición y tamaño aleatorios
+            flower.style.left = Math.random() * 100 + 'vw';
+            flower.style.fontSize = Math.random() * 1.5 + 1 + 'em';
+            flower.style.animationDuration = Math.random() * 2 + 3 + 's'; // Duración entre 3 y 5 segundos
+
+            document.body.appendChild(flower);
+
+            // Limpiamos la flor del DOM después de que termine su animación
+            setTimeout(() => {
+                flower.remove();
+            }, 5000);
+        }
+        
+        buttons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                // Verificamos si el botón presionado es el correcto en la secuencia
+                if (button.dataset.letter === nameSequence[progressIndex]) {
+                    // Obtenemos la frase correspondiente
+                    const newPhrase = phrases[progressIndex];
+                    
+                    // Mostramos la frase con una animación
+                    phraseDisplay.classList.remove('show');
+                    // Un pequeño truco para reiniciar la animación CSS
+                    void phraseDisplay.offsetWidth; 
+                    phraseDisplay.textContent = newPhrase;
+                    phraseDisplay.classList.add('show');
+                    
+                    // Deshabilitamos el botón para que no se pueda volver a presionar
+                    button.disabled = true;
+                    
+                    // Creamos una lluvia de flores
+                    for (let i = 0; i < 10; i++) {
+                        createFlower();
+                    }
+                    
+                    // Avanzamos al siguiente paso de la secuencia
+                    progressIndex++;
+                }
+            });
+        });
+        
+        // El botón de reinicio simplemente recarga la página
+        resetButton.addEventListener('click', () => {
+            location.reload();
+        });
+
+    </script>
+
+</body>
+</html>
